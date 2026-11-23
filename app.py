@@ -34,8 +34,11 @@ def predict_diabetes(age, bmi, systolic_bp, diastolic_bp, cholesterol_total,
         'smoking_status': smoking, 'employment_status': employment
     }])
 
-    # Encode exactly like training data
-    raw_encoded = pd.get_dummies(raw, drop_first=True)
+    # One-hot encode, then align to the training columns.
+    # (drop_first is not used here: on a single row it would drop the only
+    # category present and silently zero out every categorical input.
+    # reindex() below removes the baseline categories instead.)
+    raw_encoded = pd.get_dummies(raw)
 
     # Align columns to match training (fills any missing dummy columns with 0)
     raw_encoded = raw_encoded.reindex(columns=model_columns, fill_value=0)
@@ -68,7 +71,7 @@ interface = gr.Interface(
         gr.Number(label="Family History of Diabetes (0=No, 1=Yes)"),
         gr.Number(label="Hypertension History (0=No, 1=Yes)"),
         gr.Number(label="Cardiovascular History (0=No, 1=Yes)"),
-        gr.Dropdown(choices=["Male", "Female"], label="Gender"),
+        gr.Dropdown(choices=["Male", "Female", "Other"], label="Gender"),
         gr.Dropdown(choices=["Hispanic", "White", "Asian", "Black", "Other"], label="Ethnicity"),
         gr.Dropdown(choices=["Highschool", "Graduate", "Postgraduate", "No formal"], label="Education Level"),
         gr.Dropdown(choices=["Lower-Middle", "Upper-Middle", "Low", "Middle", "High"], label="Income Level"),
